@@ -57,9 +57,12 @@ module.exports.fileRead = function readFile(invName) {
   const packet = /(Тарифний Пакет:)\s([A-z]+\s[A-z]+\s[A-z]+)/gim;
   const period = /(Номер рахунку: +\d{7,12} від )(\d{2}.\d{2}.\d{4})/gim;
 
-  //let dateof = period.exec(con);
-  //console.log(dateof[2])
-  to_db(telex, semen, packet, period, con);
+
+  let dateof = period.exec(con)[2].split('.');
+  let dateform = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
+  //console.log(dateform);
+
+  to_db(telex, semen, packet, dateform, con);
 
 };
 
@@ -71,14 +74,23 @@ const connect = mysql.createPool({
   database: 'vf'
 });
 
+/*function converDate(period, con) {
+  let dateof = period.exec(con)[2].split('.');
+  let dateform = new Date(dateof[2], dateof[1], dateof[0]);
+  console.log(dateform);
+  //to_db(dateform);
+  return dateform;
+}*/
 
-function to_db(telex, semen, packet, period, con) {
+function to_db(telex, semen, packet, dateform, con) {
   let tel;
   let summer;
   let pack;
-  let dateof = period.exec(con);
+  //let dateof = period.exec(con);
+  //let dateform = dateof.getDate();
+
   while ((tel=telex.exec(con)) && (summer=semen.exec(con)) && (pack=packet.exec(con))) {
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateof[2] + "')";
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateform + "')";
     //let insert_data = "INSERT INTO vf_details (phone, sum, packet) VALUES" + "('" + tel[2] + "', " + "'" + summer[2] + "', " + "'" + pack[2] + "')";
     connect.getConnection(function(err, connection) {
       //Creating details table
