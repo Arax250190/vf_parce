@@ -20,11 +20,11 @@ router.post('/', function(req, res) {
 
   let fName = req.files.fName;
 
-  fName.mv('./uploads/' + fName.name, function(err) {
+  fName.mv('./upload/' + fName.name, function(err) {
     if (err)
       return res.status(500).send(err);
 
-    app.fileRead(fName.name);
+    app.fileRead('./upload/'+fName.name);
     status = 'You file' + ' ' + fName.name + ' ' + 'has been uploaded';
     res.redirect('/');
   });
