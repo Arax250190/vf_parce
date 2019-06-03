@@ -47,7 +47,13 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
+const connect = mysql.createPool({
+  host: '10.4.2.125',
+  port: '3306',
+  user: 'dbuser',
+  password: '!QAZxsw2',
+  database: 'vf'
+});
 
 module.exports.fileRead = function readFile(invName) {
 
@@ -66,21 +72,11 @@ module.exports.fileRead = function readFile(invName) {
 
 };
 
-const connect = mysql.createPool({
-  host: '10.4.2.125',
-  port: '3306',
-  user: 'dbuser',
-  password: '!QAZxsw2',
-  database: 'vf'
-});
+function checkInv(telex, semen, packet, dateform, con) {
 
-/*function converDate(period, con) {
-  let dateof = period.exec(con)[2].split('.');
-  let dateform = new Date(dateof[2], dateof[1], dateof[0]);
-  console.log(dateform);
-  //to_db(dateform);
-  return dateform;
-}*/
+}
+
+
 
 function to_db(telex, semen, packet, dateform, con) {
   let tel;
@@ -106,5 +102,7 @@ function to_db(telex, semen, packet, dateform, con) {
 
   }
 }
+
+
 
 module.exports = app;

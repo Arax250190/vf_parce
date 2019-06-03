@@ -17,15 +17,16 @@ router.post('/', function(req, res) {
     return res.status(400).redirect('/');
 
   }
-
+  let dateform = new Intl.DateTimeFormat('uk-UA', { year: 'numeric', month: '2-digit'});
+  let fNameform = dateform.format(Date.now()).toString().replace('/', '.') + '_'+req.files.fName.name;
   let fName = req.files.fName;
 
-  fName.mv('./upload/' + fName.name, function(err) {
+  fName.mv('./upload/' + fNameform, function(err) {
     if (err)
       return res.status(500).send(err);
 
-    app.fileRead('./upload/'+fName.name);
-    status = 'You file' + ' ' + fName.name + ' ' + 'has been uploaded';
+    app.fileRead('./upload/'+ fNameform);
+    status = 'You file' + ' ' + fNameform + ' ' + 'has been uploaded';
     res.redirect('/');
   });
 });
