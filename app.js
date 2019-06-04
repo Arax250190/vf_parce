@@ -7,9 +7,8 @@ const fs = require('fs');
 const fileUpload = require('express-fileupload');
 const layout = require('express-layout');
 const db = require('./bin/db');
+const re = require('./regext')
 //const config = require('./config');
-
-
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -44,32 +43,42 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
   // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
 
-
-
 module.exports.fileRead = function readFile(invName) {
 
   const con = fs.readFileSync(invName).toString();
-  const telex = /(Номер телефону: )(38050\d{7})/gim;
-  const semen = /(ЗАГАЛОМ ЗА КОНТРАКТОМ \(БЕЗ ПДВ ТА ПФ\):  . . . . . . . . . . . . . . . . . . . . . . . . . . .)\s+(\d+\.\d\d)/gim;
-  const packet = /(Тарифний Пакет:)\s([A-z]+\s[A-z]+\s[A-z]+)/gim;
-  const period = /(Номер рахунку: +\d{7,12} від )(\d{2}.\d{2}.\d{4})/gim;
-
+  const telex = new RegExp(re.vodafone.telephone, 'gim');
+  const sumex = new RegExp(re.vodafone.sum, 'gim');
+  const packet = new RegExp(re.vodafone.packet, 'gim');
+  const period = new RegExp(re.vodafone.period, 'gim');
 
   let dateof = period.exec(con)[2].split('.');
   let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
-  //let checkdate = dateof[1]+ '.' +dateof[2];
-  //console.log(checkdate);
-
-  //checkInv(telex, semen, packet, dateForm, con, dateof);
-  insertToDb(telex, semen, packet, dateForm, con);
+  //checkInv(telex, sumex, packet, dateForm, con, dateof);
+  insertToDb(telex, sumex, packet, dateForm, con);
 
 };
+
+function insertToDb(telex, sumex, packet, dateForm, con) {
+  let tel;
+  let summer;
+  let pack;
+  while ((tel=telex.exec(con)) && (summer=sumex.exec(con)) && (pack=packet.exec(con))) {
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateForm + "')";
+    //let insert_data = "INSERT INTO vf_details (phone, sum, packet) VALUES" + "('" + tel[2] + "', " + "'" + summer[2] + "', " + "'" + pack[2] + "')";
+    db.dbQuery(insert_data);
+    console.log('Successfully!_func');
+  }
+}
+
+
+
+module.exports = app;
+
 
 /*function checkInv(telex, semen, packet, dateForm, con, dateof) {
   let checkdate = dateof[1]+ '.' +dateof[2];
@@ -90,26 +99,3 @@ module.exports.fileRead = function readFile(invName) {
       }
 
 });*/
-
-function insertToDb(telex, semen, packet, dateForm, con) {
-  let tel;
-  let summer;
-  let pack;
-  //let dateof = period.exec(con);
-  //let dateform = dateof.getDate();
-
-  while ((tel=telex.exec(con)) && (summer=semen.exec(con)) && (pack=packet.exec(con))) {
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateForm + "')";
-    //let insert_data = "INSERT INTO vf_details (phone, sum, packet) VALUES" + "('" + tel[2] + "', " + "'" + summer[2] + "', " + "'" + pack[2] + "')";
-    db.dbQuery(insert_data);
-
-    console.log('Successfully!_func');
-
-
-
-  }
-}
-
-
-
-module.exports = app;

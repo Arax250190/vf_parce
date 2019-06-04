@@ -10,7 +10,6 @@ module.exports.dbQuery = function dbQuery(queryToDb) {
             if (err) throw err;
             else {
                 return result;
-                console.log('Successfully!_DB');
             }
         });
         connection.release();
