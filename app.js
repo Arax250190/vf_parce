@@ -4,10 +4,12 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require('fs');
-const mysql = require('mysql');
 const fileUpload = require('express-fileupload');
 const layout = require('express-layout');
-const config = require('./config');
+const db = require('./bin/db');
+//const config = require('./config');
+
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -48,7 +50,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-const connect = mysql.createPool(config.db);
+
 
 module.exports.fileRead = function readFile(invName) {
 
@@ -60,20 +62,36 @@ module.exports.fileRead = function readFile(invName) {
 
 
   let dateof = period.exec(con)[2].split('.');
-  let dateform = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
-  //console.log(dateform);
+  let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
+  //let checkdate = dateof[1]+ '.' +dateof[2];
+  //console.log(checkdate);
 
-  to_db(telex, semen, packet, dateform, con);
+  //checkInv(telex, semen, packet, dateForm, con, dateof);
+  insertToDb(telex, semen, packet, dateForm, con);
 
 };
 
-function checkInv(telex, semen, packet, dateform, con) {
+/*function checkInv(telex, semen, packet, dateForm, con, dateof) {
+  let checkdate = dateof[1]+ '.' +dateof[2];
+  const select_date = "SELECT DATE_FORMAT(period, '%m %Y') AS \"period\" FROM vf_details";
+  connect.getConnection(function(err, connection) {
+    //Creating details table
+    connection.query(select_date, function (err, result) {
+      if (err) throw err;
+      else {
+        let str = JSON.stringify(result[0].period.replace(" ", "."));
+        let dateIndb = str.replace(/"/g, '');
+        if (checkdate === dateIndb) console.log('the same invoice');
+        else {
+          insertToDb(telex, semen, packet, dateForm, con);
+        }
+        console.log(dateIndb);
+        console.log(checkdate);
+      }
 
-}
+});*/
 
-
-
-function to_db(telex, semen, packet, dateform, con) {
+function insertToDb(telex, semen, packet, dateForm, con) {
   let tel;
   let summer;
   let pack;
@@ -81,18 +99,12 @@ function to_db(telex, semen, packet, dateform, con) {
   //let dateform = dateof.getDate();
 
   while ((tel=telex.exec(con)) && (summer=semen.exec(con)) && (pack=packet.exec(con))) {
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateform + "')";
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateForm + "')";
     //let insert_data = "INSERT INTO vf_details (phone, sum, packet) VALUES" + "('" + tel[2] + "', " + "'" + summer[2] + "', " + "'" + pack[2] + "')";
-    connect.getConnection(function(err, connection) {
-      //Creating details table
-      connection.query(insert_data, function (err) {
-        if (err) throw err;
-        else {
-          console.log('Successfully!');
-        }
-      });
-      connection.release();
-    });
+    db.dbQuery(insert_data);
+
+    console.log('Successfully!_func');
+
 
 
   }

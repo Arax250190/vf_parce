@@ -1,23 +1,19 @@
 const mysql = require('mysql');
+const config = require('./config');
 
-const connect = mysql.createPool({
-    host: '10.4.2.125',
-    port: '3306',
-    user: 'dbuser',
-    password: '!QAZxsw2',
-    database: 'vf'
-});
+const connect = mysql.createPool(config.db);
 
-const select = "SELECT DATE_FORMAT(period, '%m %Y') FROM vf_details";
+const select = "SELECT DATE_FORMAT(period, '%m %Y') AS \"period\" FROM vf_details";
 connect.getConnection(function(err, connection) {
     //Creating details table
     connection.query(select, function (err, result) {
         if (err) throw err;
         else {
-            let str = JSON.stringify(result);
-            let json = JSON.parse(str);
-            let per = "DATE_FORMAT\(period, '%m %Y'\)";
-            console.log(json[0].per);
+            let str = JSON.stringify(result[0].period.replace(" ", "."));
+            console.log(JSON.stringify(result))
+            //let json = JSON.parse(str);
+           //let per = "DATE_FORMAT\(period, '%m %Y'\)";
+            console.log(str.replace(/"/g, ''));
         }
     });
     connection.release();
