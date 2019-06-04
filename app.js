@@ -7,6 +7,7 @@ const fs = require('fs');
 const mysql = require('mysql');
 const fileUpload = require('express-fileupload');
 const layout = require('express-layout');
+const config = require('./config');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -47,13 +48,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-const connect = mysql.createPool({
-  host: '10.4.2.125',
-  port: '3306',
-  user: 'dbuser',
-  password: '!QAZxsw2',
-  database: 'vf'
-});
+const connect = mysql.createPool(config.db);
 
 module.exports.fileRead = function readFile(invName) {
 

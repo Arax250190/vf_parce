@@ -1,0 +1,13 @@
+{
+  "server": {
+    "_bind-address": "127.0.0.1",
+    "port": 3000
+  },
+  "db": {
+    "host": "10.4.2.125",
+    "port": "3306",
+    "user": "dbuser",
+    "password": "!QAZxsw2",
+    "database": "vf"
+  }
+}
