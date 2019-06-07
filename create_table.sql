@@ -1,9 +1,16 @@
-create table if not exists vf_details
-(
-    id     int(15) auto_increment
-        primary key,
-    phone  varchar(15) null,
-    sum    float       null,
-    packet varchar(30) null,
-    period date        null
-);
+CREATE TABLE vf.vf_details (
+  id INT(15) NOT NULL AUTO_INCREMENT,
+  phone VARCHAR(15) DEFAULT NULL,
+  packet VARCHAR(30) DEFAULT NULL,
+  overPack FLOAT DEFAULT NULL,
+  roaming FLOAT DEFAULT NULL,
+  contentService FLOAT DEFAULT NULL,
+  sum FLOAT DEFAULT NULL,
+  period DATE DEFAULT NULL,
+  PRIMARY KEY (id)
+)
+ENGINE = INNODB,
+AUTO_INCREMENT = 1480,
+AVG_ROW_LENGTH = 186,
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;
