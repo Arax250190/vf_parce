@@ -7,7 +7,8 @@ const fs = require('fs');
 const fileUpload = require('express-fileupload');
 const layout = require('express-layout');
 const db = require('./bin/db');
-const re = require('./regext')
+const re = require('./regext');
+//const index = require('./routes/index');
 //const config = require('./config');
 
 const indexRouter = require('./routes/index');
@@ -55,47 +56,79 @@ module.exports.fileRead = function readFile(invName) {
   const sumex = new RegExp(re.vodafone.sum, 'gim');
   const packet = new RegExp(re.vodafone.packet, 'gim');
   const period = new RegExp(re.vodafone.period, 'gim');
+  const overex = new RegExp(re.vodafone.overpack, 'gim');
+  const blockex = new RegExp(re.vodafone.block, 'gim');
+  const roaming = new RegExp(re.vodafone.roaming, 'gim');
+  const contentex = new RegExp(re.vodafone.roaming, 'gim');
 
-  let dateof = period.exec(con)[2].split('.');
+  let dateof = period.exec(con)[0].split('.');
   let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
-  //checkInv(telex, sumex, packet, dateForm, con, dateof);
-  insertToDb(telex, sumex, packet, dateForm, con);
+
+  insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, con);
 
 };
 
-function insertToDb(telex, sumex, packet, dateForm, con) {
+
+function insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, con) {
+  let test = con.match(blockex);
   let tel;
-  let summer;
+  let sum;
+  let over;
+  let roam;
   let pack;
-  while ((tel=telex.exec(con)) && (summer=sumex.exec(con)) && (pack=packet.exec(con))) {
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, period) VALUES" + "('"+ tel[2]+"'," + "'"+ summer[2]+"'," + "'"+ pack[2] +"'," + "'"+dateForm + "')";
-    //let insert_data = "INSERT INTO vf_details (phone, sum, packet) VALUES" + "('" + tel[2] + "', " + "'" + summer[2] + "', " + "'" + pack[2] + "')";
-    db.dbQuery(insert_data);
-    console.log('Successfully!_func');
+  let content;
+
+
+  for (let i = 0; i < test.length; i++) {
+    let test2 = test[i];
+    //console.log(test2);
+
+    try {
+      tel = test2.match(telex)[0]
+    } catch (e) {
+      tel = "error parsing tel";
+    }
+
+    try {
+      sum = test2.match(sumex)[0];
+    } catch (e) {
+      sum = "error parsing sum";
+    }
+
+    try {
+      over = test2.match(overex)[0];
+    } catch (e) {
+      over = 0.00;
+    }
+
+    try {
+      roam = test2.match(roaming)[0];
+    } catch (e) {
+      roam = 0.00;
+    }
+
+    try {
+      content = test2.match(contentex)[0];
+    } catch (e) {
+      content = 0.00;
+    }
+
+    try {
+      pack = test2.match(packet)[0];
+    } catch (e) {
+      pack = "error parsing packet"
+    }
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('" + tel + "'," + "'" + sum + "'," + "'" + pack + "'," + "'" + over + "'," + "'" + roam + "'," + "'" + content + "'," + "'" + dateForm + "')";
+    db.query(insert_data, function (err) {
+      if (err) throw err;
+      else {
+        console.log('success')
+      }
+    });
+
+    console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content + ' ' + dateForm);
   }
 }
 
 
-
 module.exports = app;
-
-
-/*function checkInv(telex, semen, packet, dateForm, con, dateof) {
-  let checkdate = dateof[1]+ '.' +dateof[2];
-  const select_date = "SELECT DATE_FORMAT(period, '%m %Y') AS \"period\" FROM vf_details";
-  connect.getConnection(function(err, connection) {
-    //Creating details table
-    connection.query(select_date, function (err, result) {
-      if (err) throw err;
-      else {
-        let str = JSON.stringify(result[0].period.replace(" ", "."));
-        let dateIndb = str.replace(/"/g, '');
-        if (checkdate === dateIndb) console.log('the same invoice');
-        else {
-          insertToDb(telex, semen, packet, dateForm, con);
-        }
-        console.log(dateIndb);
-        console.log(checkdate);
-      }
-
-});*/

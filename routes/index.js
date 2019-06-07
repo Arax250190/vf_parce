@@ -8,6 +8,7 @@ router.get('/', (req, res) => {
   res.render('index', {status: status});
   status = 'Waiting for file upload';
 
+
 });
 
 router.post('/', function(req, res) {
@@ -34,3 +35,4 @@ router.post('/', function(req, res) {
 
 
 module.exports = router;
+//module.exports = status;
