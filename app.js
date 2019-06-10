@@ -59,66 +59,83 @@ module.exports.fileRead = function readFile(invName) {
   const overex = new RegExp(re.vodafone.overpack, 'gim');
   const blockex = new RegExp(re.vodafone.block, 'gim');
   const roaming = new RegExp(re.vodafone.roaming, 'gim');
-  const contentex = new RegExp(re.vodafone.roaming, 'gim');
+  const contentex = new RegExp(re.vodafone.contentService, 'gim');
+  const discountex = new RegExp(re.vodafone.discount, 'gim');
+  const packpricex = new RegExp(re.vodafone.packPrice, 'gim');
 
   let dateof = period.exec(con)[0].split('.');
   let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
 
-  insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, con);
+  insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, discountex, packpricex, con);
 
 };
 
 
-function insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, con) {
-  let test = con.match(blockex);
+function insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, discountex, packpricex, con) {
+  let block = con.match(blockex);
   let tel;
   let sum;
   let over;
   let roam;
   let pack;
   let content;
+  let discount;
+  let packprice;
 
 
-  for (let i = 0; i < test.length; i++) {
-    let test2 = test[i];
-    //console.log(test2);
+  for (let i = 0; i < block.length; i++) {
+    let blocki = block[i];
+    //console.log(blocki);
 
     try {
-      tel = test2.match(telex)[0]
+      tel = blocki.match(telex)[0]
     } catch (e) {
       tel = "error parsing tel";
     }
 
     try {
-      sum = test2.match(sumex)[0];
+      sum = blocki.match(sumex)[0];
     } catch (e) {
       sum = "error parsing sum";
     }
 
     try {
-      over = test2.match(overex)[0];
+      over = blocki.match(overex)[0];
     } catch (e) {
       over = 0.00;
     }
 
     try {
-      roam = test2.match(roaming)[0];
+      roam = blocki.match(roaming)[0];
     } catch (e) {
       roam = 0.00;
     }
 
     try {
-      content = test2.match(contentex)[0];
+      content = blocki.match(contentex)[0];
     } catch (e) {
       content = 0.00;
     }
 
     try {
-      pack = test2.match(packet)[0];
+      pack = blocki.match(packet)[0];
     } catch (e) {
       pack = "error parsing packet"
     }
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('" + tel + "'," + "'" + sum + "'," + "'" + pack + "'," + "'" + over + "'," + "'" + roam + "'," + "'" + content + "'," + "'" + dateForm + "')";
+
+    try {
+      discount = blocki.match(discountex)[0];
+    } catch (e) {
+      discount = 0.00;
+    }
+
+    try {
+      packprice = blocki.match(packpricex)[0];
+    } catch (e) {
+      discount = 0.00;
+    }
+
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, packPrice, discount, overPack, roaming, contentService, period) VALUES" + "('" + tel + "'," + "'" + sum + "'," + "'" + pack + "'," + "'" + packprice + "'," + "'" + discount + "'," + "'" + over + "'," + "'" + roam + "'," + "'" + content + "'," + "'" + dateForm + "')";
     db.query(insert_data, function (err) {
       if (err) throw err;
       else {
@@ -126,7 +143,7 @@ function insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, co
       }
     });
 
-    console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content + ' ' + dateForm);
+    //console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content + ' ' + dateForm);
   }
 }
 

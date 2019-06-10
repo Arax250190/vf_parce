@@ -11,7 +11,7 @@ const re = require('./regext_test')
     const period = new RegExp(re.vodafone.period, 'gim');
     const overpack = new RegExp(re.vodafone.overpack, 'gim');
     const testex = new RegExp(re.vodafone.block, 'gim');
-    const roaming = new RegExp(re.vodafone.roaming, 'gim');
+    const roaming = new RegExp(re.vodafone.contentService, 'gim');
     const contentex = new RegExp(re.vodafone.roaming, 'gim');
 
 let dateof = period.exec(con)[0].split('.');
@@ -50,12 +50,14 @@ for (let i=0; i<test.length; i++) {
 
     try {
         roam = test2.match(roaming)[0];
+        console.log(roam)
     } catch (e) {
         roam = 0.00;
     }
 
     try {
         content = test2.match(contentex)[0];
+        console.log(content)
     } catch (e) {
         content = 0.00;
     }
@@ -65,13 +67,14 @@ for (let i=0; i<test.length; i++) {
     } catch (e) {
         pack = "error parsing packet"
     }
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('"+ tel+"'," + "'"+ sum+"'," + "'"+ pack+"'," + "'"+over+"'," + "'"+roam+"'," +"'"+content+"'," + "'"+dateForm + "')";
+    let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('"+ tel +"', " + "'"+ sum +"', " + "'" + pack +"', " + "'"+ over +"', " + "'"+ roam +"', " +"'"+ content +"', " + "'"+ dateForm + "')";
     db.query(insert_data, function (err) {
         if (err) throw err;
         else {
             console.log('success')
         }
     });
+    console.log(insert_data);
 
     console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content +' ' + dateForm);
 }

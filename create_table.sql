@@ -1,16 +1,16 @@
-CREATE TABLE vf.vf_details (
-  id INT(15) NOT NULL AUTO_INCREMENT,
-  phone VARCHAR(15) DEFAULT NULL,
-  packet VARCHAR(30) DEFAULT NULL,
-  overPack FLOAT DEFAULT NULL,
-  roaming FLOAT DEFAULT NULL,
-  contentService FLOAT DEFAULT NULL,
-  sum FLOAT DEFAULT NULL,
-  period DATE DEFAULT NULL,
-  PRIMARY KEY (id)
-)
-ENGINE = INNODB,
-AUTO_INCREMENT = 1480,
-AVG_ROW_LENGTH = 186,
-CHARACTER SET utf8,
-COLLATE utf8_general_ci;
+create table vf_details
+(
+    id             int(15) auto_increment
+        primary key,
+    phone          varchar(15) null,
+    packet         varchar(30) null,
+    packPrice      float       null,
+    discount       float       null,
+    overPack       float       null,
+    roaming        float       null,
+    contentService float       null,
+    sum            float       null,
+    period         date        null
+);
+
+
