@@ -40,7 +40,7 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -49,101 +49,146 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports.fileRead = function readFile(invName) {
+let con;
+let telex;
+let sumex;
+let packet;
+let period;
+let overex;
+let blockex;
+let roaming;
+let contentex;
+let discountex;
+let packpricex;
+let checkProvEx;
+let dateForm;
 
-  const con = fs.readFileSync(invName).toString();
-  const telex = new RegExp(re.vodafone.telephone, 'gim');
-  const sumex = new RegExp(re.vodafone.sum, 'gim');
-  const packet = new RegExp(re.vodafone.packet, 'gim');
-  const period = new RegExp(re.vodafone.period, 'gim');
-  const overex = new RegExp(re.vodafone.overpack, 'gim');
-  const blockex = new RegExp(re.vodafone.block, 'gim');
-  const roaming = new RegExp(re.vodafone.roaming, 'gim');
-  const contentex = new RegExp(re.vodafone.contentService, 'gim');
-  const discountex = new RegExp(re.vodafone.discount, 'gim');
-  const packpricex = new RegExp(re.vodafone.packPrice, 'gim');
+module.exports.fileRead = function readFile(invName) {
+try{
+  con = fs.readFileSync(invName).toString();
+  telex = new RegExp(re.vodafone.telephone, 'im');
+  sumex = new RegExp(re.vodafone.sum, 'im');
+  packet = new RegExp(re.vodafone.packet, 'im');
+  period = new RegExp(re.vodafone.period, 'im');
+  overex = new RegExp(re.vodafone.overpack, 'im');
+  blockex = new RegExp(re.vodafone.block, 'gim');
+  roaming = new RegExp(re.vodafone.roaming, 'im');
+  contentex = new RegExp(re.vodafone.contentService, 'im');
+  discountex = new RegExp(re.vodafone.discount, 'im');
+  packpricex = new RegExp(re.vodafone.packPrice, 'im');
+  checkProvEx = new RegExp(re.vodafone.checkProvider, 'gim');
 
   let dateof = period.exec(con)[0].split('.');
-  let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
+  dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
+  let checkProvider = con.search(checkProvEx);
+  //console.log(dateForm);
 
-  insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, discountex, packpricex, con);
+  checkProv(checkProvider, invName);
+ }
+catch (e) {
+  console.log('Wrong File')
+  }
 
 };
 
+function checkProv(checkProvider, invName) {
+  if (checkProvider > -1){
 
-function insertToDb(telex, sumex, packet, dateForm, overex, blockex, roaming, contentex, discountex, packpricex, con) {
+  try {
+    let selectInv_fromdb = "SELECT TRUE paymentPeriod from invoice where paymentPeriod = " + "'" + dateForm + "'" + " " + "LIMIT 1";
+    db.query(selectInv_fromdb, function (err, result) {
+      if (err) throw err;
+      else {
+       insertInv(result, invName);
+      }
+    });
+  }
+  catch (e) {
+    console.log('error');
+   }
+  }
+  else {
+    console.log('wrong file');
+  }
+}
+
+function insertInv(selectInv, invName) {
+  try {
+  if (selectInv.length <= 0) {
+    let insertInv_todb = "INSERT INTO invoice (provider_id, paymentPeriod, fileName) VALUES ((select id from providers where provider like 'vodafone%'), " + "'" + dateForm + "', " + "'" + invName + "'" + ")";
+    db.query(insertInv_todb, function (err) {
+      if (err) throw err;
+      else {
+        insertToDb();
+      }
+    })
+  }
+  else {
+    console.log('file exist')
+  }
+  }
+  catch (e) {
+    console.log(e);
+  }
+}
+
+
+
+function insertToDb() {
   let block = con.match(blockex);
-  let tel;
-  let sum;
-  let over;
-  let roam;
-  let pack;
-  let content;
-  let discount;
-  let packprice;
-
 
   for (let i = 0; i < block.length; i++) {
     let blocki = block[i];
-    //console.log(blocki);
+    let tel = blocki.match(telex)[0];
+    let sum = blocki.match(sumex)[0];
+    let packprice = blocki.match(packpricex)[0];
+    let pack = blocki.match(packet)[0];
+    let over = blocki.match(overex);
+    let roam = blocki.match(roaming);
+    let content = blocki.match(contentex);
+    let discount = blocki.match(discountex);
 
-    try {
-      tel = blocki.match(telex)[0]
-    } catch (e) {
-      tel = "error parsing tel";
-    }
-
-    try {
-      sum = blocki.match(sumex)[0];
-    } catch (e) {
-      sum = "error parsing sum";
-    }
-
-    try {
-      over = blocki.match(overex)[0];
-    } catch (e) {
-      over = 0.00;
-    }
-
-    try {
-      roam = blocki.match(roaming)[0];
-    } catch (e) {
-      roam = 0.00;
-    }
-
-    try {
-      content = blocki.match(contentex)[0];
-    } catch (e) {
-      content = 0.00;
-    }
-
-    try {
-      pack = blocki.match(packet)[0];
-    } catch (e) {
-      pack = "error parsing packet"
-    }
-
-    try {
-      discount = blocki.match(discountex)[0];
-    } catch (e) {
-      discount = 0.00;
-    }
-
-    try {
-      packprice = blocki.match(packpricex)[0];
-    } catch (e) {
-      discount = 0.00;
-    }
-
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, packPrice, discount, overPack, roaming, contentService, period) VALUES" + "('" + tel + "'," + "'" + sum + "'," + "'" + pack + "'," + "'" + packprice + "'," + "'" + discount + "'," + "'" + over + "'," + "'" + roam + "'," + "'" + content + "'," + "'" + dateForm + "')";
-    db.query(insert_data, function (err) {
-      if (err) throw err;
-      else {
-        console.log('success')
-      }
+    let contractMonth_todb = "INSERT INTO contractMonth (packet, price, userPhone_id, invoice_id, sum) VALUES " + "('" + pack + "', " +  "'" + packprice + "', " + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" +")," + " " + "'" + sum + "')";
+    console.log(contractMonth_todb);
+    db.query(contractMonth_todb, function (err) {
+       if (err) throw err;
+       else console.log('contractMonth success')
     });
 
-    //console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content + ' ' + dateForm);
+
+    if (over !=null){
+      let overpackMonth_todb = "INSERT INTO serviceMonth (userPhone_id, serviceName_id, invoice_id, sum) VALUES (" + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM services WHERE serviceName = " + "'" +over[1] + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" +"), " + "'" + over[2] + "'" + ")";
+      console.log(overpackMonth_todb);
+      db.query(overpackMonth_todb, function (err) {
+        if (err) throw err;
+        else console.log('overpack success')
+      });
+    }
+
+    if (roam !=null){
+      let romingMonth_todb = "INSERT INTO serviceMonth (userPhone_id, serviceName_id, invoice_id, sum) VALUES (" + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM services WHERE serviceName = " + "'" +roam[1] + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" +"), " + "'" + roam[2] + "'" + ")";
+      db.query(romingMonth_todb, function (err) {
+        if (err) throw err;
+        else console.log('roaming success')
+      });
+    }
+
+    if (content !=null){
+      let contentMonth_todb = "INSERT INTO serviceMonth (userPhone_id, serviceName_id, invoice_id, sum) VALUES (" + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM services WHERE serviceName = " + "'" +content[1] + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" +"), " + "'" + content[2] + "'" + ")";
+      db.query(contentMonth_todb, function (err) {
+        if (err) throw err;
+        else console.log('content success')
+      });
+    }
+
+
+    if (discount !=null){
+      let discountMonth_todb = "INSERT INTO serviceMonth (userPhone_id, serviceName_id, invoice_id, sum) VALUES (" + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM services WHERE serviceName = " + "'" +discount[1] + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" +"), " + "'" + discount[2] + "'" + ")";
+      db.query(discountMonth_todb, function (err) {
+        if (err) throw err;
+        else console.log('discount success')
+      });
+    }
   }
 }
 

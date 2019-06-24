@@ -4,87 +4,68 @@ const db = require('./bin/db');
 const fs = require('fs');
 const re = require('./regext_test')
 
-    const con = fs.readFileSync('./invoice2019_06.txt').toString();
+    const con = fs.readFileSync('./details.txt').toString();
     const telex = new RegExp(re.vodafone.telephone, 'gim');
     const sumex= new RegExp(re.vodafone.sum, 'gim');
     const packet = new RegExp(re.vodafone.packet, 'gim');
     const period = new RegExp(re.vodafone.period, 'gim');
-    const overpack = new RegExp(re.vodafone.overpack, 'gim');
-    const testex = new RegExp(re.vodafone.block, 'gim');
-    const roaming = new RegExp(re.vodafone.contentService, 'gim');
-    const contentex = new RegExp(re.vodafone.roaming, 'gim');
+    const overpack = new RegExp(re.vodafone.overpack, 'im');
+    const blockex = new RegExp(re.vodafone.block, 'gim');
+    const roaming = new RegExp(re.vodafone.roaming, 'im');
+    const contentex = new RegExp(re.vodafone.roaming, 'im');
 
 let dateof = period.exec(con)[0].split('.');
 let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
 
-let test=con.match(testex);
-let tel;
-let sum;
-let over;
-let roam;
-let pack;
-let content;
+let block=con.match(blockex);
+//let tel;
+//let sum;
+//let over;
+//let roam;
+//let pack;
+//let content;
 
 
-for (let i=0; i<test.length; i++) {
-    let test2 = test[i];
-    //console.log(test2);
+for (let i=0; i<block.length; i++) {
+    let blocki = block[i];
+    //console.log(blocki);
 
-   try {
-       tel = test2.match(telex)[0]
-    } catch (e) {
-       tel = "error parsing tel";
+  let  tel = blocki.match(telex)[0];
+  let  sum = blocki.match(sumex)[0];
+  let  over = blocki.match(overpack);
+  let  roam = blocki.match(roaming);
+  let  content = blocki.match(contentex);
+  let  pack = blocki.match(packet);
+
+
+  if (over !=null){
+      console.log(tel + ' ' + over[1] + ' ' + over[2]);
     }
+  if (roam !=null){
+      console.log(tel + ' ' + roam[1] + ' ' + roam[2]);
+   }
+  //else console.log('0');
 
-    try {
-       sum = test2.match(sumex)[0];
-    } catch (e) {
-       sum = "error parsing sum";
-    }
 
-    try {
-       over = test2.match(overpack)[0];
-    } catch (e) {
-       over = 0.00;
-    }
 
-    try {
-        roam = test2.match(roaming)[0];
-        console.log(roam)
-    } catch (e) {
-        roam = 0.00;
-    }
-
-    try {
-        content = test2.match(contentex)[0];
-        console.log(content)
-    } catch (e) {
-        content = 0.00;
-    }
-
-    try {
-        pack = test2.match(packet)[0];
-    } catch (e) {
-        pack = "error parsing packet"
-    }
-    let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('"+ tel +"', " + "'"+ sum +"', " + "'" + pack +"', " + "'"+ over +"', " + "'"+ roam +"', " +"'"+ content +"', " + "'"+ dateForm + "')";
+    /*let insert_data = "INSERT INTO vf_details (phone, sum, packet, overPack, roaming, contentService, period) VALUES" + "('"+ tel +"', " + "'"+ sum +"', " + "'" + pack +"', " + "'"+ over +"', " + "'"+ roam +"', " +"'"+ content +"', " + "'"+ dateForm + "')";
     db.query(insert_data, function (err) {
         if (err) throw err;
         else {
             console.log('success')
         }
     });
-    console.log(insert_data);
-
-    console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content +' ' + dateForm);
+    console.log(insert_data);*/
+   //console.log(tel + ' ' + sum + ' ' + over + ' ' + roam + ' ' + pack + ' ' + content +' ' + dateForm);
+   // console.log(tel + ' ' + over[0]);
 }
 
 
-/*let test=con.match(testex);
+/*let block=con.match(blockex);
 
 
-for (let i=0; i<test.length; i++) {
-    let test2 = test[i];
+for (let i=0; i<block.length; i++) {
+    let test2 = block[i];
     console.log(test2);
 
     try {
@@ -129,18 +110,18 @@ let par = function () {
      });
 };
 
-for (let i=0; i<test.length; i++){
-    par(test)
+for (let i=0; i<block.length; i++){
+    par(block)
         .then(function () {
-        console.log(telex.exec(test[i])[0]);
+        console.log(telex.exec(block[i])[0]);
     })
         .then(function () {
-        //let  tel=telex.exec(test[i]);
-        console.log(sumex.exec(test[i])[2]);
+        //let  tel=telex.exec(block[i]);
+        console.log(sumex.exec(block[i])[2]);
     })
         .then(function () {
         try {
-            let overp=overpack.exec(test[i]);
+            let overp=overpack.exec(block[i]);
            console.log(overp[0])
         } catch (e) {
            console.log(0.00)
@@ -154,8 +135,8 @@ for (let i=0; i<test.length; i++){
     console.log(tel[0])
 }
 
-    let tel = telex.exec(test[i])
-for (let i=0; i<test.length; i++){
+    let tel = telex.exec(block[i])
+for (let i=0; i<block.length; i++){
     parce(i)
     telp(i)
 }
@@ -164,24 +145,24 @@ for (let i=0; i<test.length; i++){
 
 
 
- /*   for (let i=0; i<test.length; i++) {
-        await console.log(test[i]);
+ /*   for (let i=0; i<block.length; i++) {
+        await console.log(block[i]);
 
 
-        await tel=telex.exec(test[i]);
+        await tel=telex.exec(block[i]);
          console.log(tel[0]);
 
-        let summer=sumex.exec(test[i]);
+        let summer=sumex.exec(block[i]);
         await console.log(summer[2]);
 
         try {
-            let overp=overpack.exec(test[i]);
+            let overp=overpack.exec(block[i]);
             await console.log(overp[0])
         } catch (e) {
             await  console.log(0.00)
         }
         try {
-            let rom = roaming.exec(test[i]);
+            let rom = roaming.exec(block[i]);
             await   console.log(rom[2])
         } catch (e) {
             await    console.log(0.00)
@@ -190,7 +171,7 @@ for (let i=0; i<test.length; i++){
 
     }
     */
-   //testex.exec(con)
+   //blockex.exec(con)
     //let dateof = period.exec(con)[2].split('.');
     //let dateForm = dateof[2]+'-'+dateof[1]+'-'+dateof[0];
 
