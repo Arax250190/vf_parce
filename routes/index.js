@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const app = require('../app');
+const pars = require('../bin/modules/parser');
 
 let status = 'Waiting for file upload';
 
@@ -26,7 +27,7 @@ router.post('/', function(req, res) {
     if (err)
       return res.status(500).send(err);
 
-    app.fileRead('./upload/'+ fNameform);
+    pars.fileRead('./upload/'+ fNameform);
     status = 'You file' + ' ' + fNameform + ' ' + 'has been uploaded';
     res.redirect('/');
   });
