@@ -3,13 +3,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-//const fs = require('fs');
 const fileUpload = require('express-fileupload');
 const layout = require('express-layout');
-//const db = require('./bin/db');
-//const re = require('./regext');
-//const index = require('./routes/index');
-//const config = require('./config');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
