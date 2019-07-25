@@ -104,6 +104,8 @@ function insertToDb() {
         let discount = blocki.match(discountex);
 
 
+
+
         if ((pack !== null ) && (packprice !== null) && (sum !== null)){
             let contractMonth_todb = "INSERT INTO contractMonth (packet, price, userPhone_id, invoice_id, sum) VALUES " + "('" + pack + "', " + "'" + packprice + "', " + "(SELECT id FROM phones WHERE phoneNumber =" + " " + "'" + tel + "'" + "), " + "(SELECT id FROM invoice WHERE paymentPeriod = " + "'" + dateForm + "'" + ")," + " " + "'" + sum + "')";
             console.log(contractMonth_todb);

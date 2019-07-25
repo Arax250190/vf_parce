@@ -20,7 +20,7 @@ let outBoundEx;
 let cdr;
 
 try{
-    con = fs.readFileSync('./invoice2019_06.txt').toString();
+    con = fs.readFileSync('./upload/06.2019_invoice2019_06.txt').toString();
     telex = new RegExp(re.vodafone.telephone, 'im');
     sumex = new RegExp(re.vodafone.sum, 'im');
     packet = new RegExp(re.vodafone.packet, 'im');
